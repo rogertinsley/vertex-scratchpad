@@ -3,7 +3,6 @@
 Hacking and scratching with vertx - https://vertx.io
 
 [![Build Status](https://github.com/roger/vertx/actions/workflows/maven.yml/badge.svg)](https://github.com/roger/vertx/actions/workflows/maven.yml)
-[![License](https://img.shields.io/github/license/roger/vertx)](https://github.com/roger/vertx/blob/main/LICENSE)
 
 ## Prerequisites
 
