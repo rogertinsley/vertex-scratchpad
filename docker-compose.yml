@@ -1,0 +1,27 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8888:8888"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=vertxdb
+      - DB_USER=vertxuser
+      - DB_PASSWORD=vertxpass
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=vertxdb
+      - POSTGRES_USER=vertxuser
+      - POSTGRES_PASSWORD=vertxpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data: 

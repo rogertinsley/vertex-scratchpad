@@ -29,20 +29,41 @@ public class TodoVerticle extends AbstractVerticle {
     @Override
     public void start(Promise<Void> startPromise) {
         PgConnectOptions connectOptions = new PgConnectOptions()
-            .setPort(5432)
-            .setHost("localhost")
-            .setDatabase("tododb")
-            .setUser("postgres")
-            .setPassword("postgres");
+            .setPort(Integer.parseInt(System.getenv().getOrDefault("DB_PORT", "5432")))
+            .setHost(System.getenv().getOrDefault("DB_HOST", "localhost"))
+            .setDatabase(System.getenv().getOrDefault("DB_NAME", "vertxdb"))
+            .setUser(System.getenv().getOrDefault("DB_USER", "vertxuser"))
+            .setPassword(System.getenv().getOrDefault("DB_PASSWORD", "vertxpass"));
 
         PoolOptions poolOptions = new PoolOptions()
             .setMaxSize(30);
 
         Pool client = Pool.pool(vertx, connectOptions, poolOptions);
 
-        TodoRepository repository = new TodoRepositoryImpl(client);
-        todoService = new TodoServiceImpl(repository);
+        // Initialize database schema
+        client.query("""
+            CREATE TABLE IF NOT EXISTS todos (
+                id SERIAL PRIMARY KEY,
+                title VARCHAR(255) NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP NOT NULL,
+                updated_at TIMESTAMP NOT NULL
+            )
+        """).execute()
+        .onSuccess(result -> {
+            System.out.println("Database schema initialized successfully");
+            TodoRepository repository = new TodoRepositoryImpl(client);
+            todoService = new TodoServiceImpl(repository);
+            setupRouter(startPromise);
+        })
+        .onFailure(err -> {
+            System.err.println("Failed to initialize database schema: " + err.getMessage());
+            startPromise.fail(err);
+        });
+    }
 
+    private void setupRouter(Promise<Void> startPromise) {
         router.route().handler(BodyHandler.create());
 
         router.get("/").handler(ctx -> {

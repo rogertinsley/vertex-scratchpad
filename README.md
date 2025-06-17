@@ -2,8 +2,6 @@
 
 Hacking and scratching with vertx - https://vertx.io
 
-[![Build Status](https://github.com/roger/vertx/actions/workflows/maven.yml/badge.svg)](https://github.com/roger/vertx/actions/workflows/maven.yml)
-
 ## Prerequisites
 
 - Java 17 or later
