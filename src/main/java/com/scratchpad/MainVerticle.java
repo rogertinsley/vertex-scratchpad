@@ -7,11 +7,6 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.core.DeploymentOptions;
 import java.util.concurrent.ConcurrentHashMap;
-import com.scratchpad.model.Todo;
-import com.scratchpad.repository.TodoRepository;
-import com.scratchpad.repository.TodoRepositoryImpl;
-import com.scratchpad.service.TodoService;
-import com.scratchpad.service.TodoServiceImpl;
 
 public class MainVerticle extends AbstractVerticle {
     private final ConcurrentHashMap<String, JsonObject> dataStore = new ConcurrentHashMap<>();
