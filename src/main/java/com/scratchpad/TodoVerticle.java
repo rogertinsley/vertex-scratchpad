@@ -16,10 +16,18 @@ import io.vertx.ext.web.handler.BodyHandler;
 
 public class TodoVerticle extends AbstractVerticle {
     private TodoService todoService;
+    private Router router;
+
+    public void setRouter(Router router) {
+        this.router = router;
+    }
+
+    public Router getRouter() {
+        return router;
+    }
 
     @Override
     public void start(Promise<Void> startPromise) {
-        // Configure PostgreSQL connection
         PgConnectOptions connectOptions = new PgConnectOptions()
             .setPort(5432)
             .setHost("localhost")
@@ -27,23 +35,17 @@ public class TodoVerticle extends AbstractVerticle {
             .setUser("postgres")
             .setPassword("postgres");
 
-        // Pool options
         PoolOptions poolOptions = new PoolOptions()
             .setMaxSize(30);
 
-        // Create the client pool
         Pool client = Pool.pool(vertx, connectOptions, poolOptions);
 
-        // Initialize repository and service
         TodoRepository repository = new TodoRepositoryImpl(client);
         todoService = new TodoServiceImpl(repository);
 
-        // Create router
-        Router router = Router.router(vertx);
         router.route().handler(BodyHandler.create());
 
-        // Define routes
-        router.get("/todos").handler(ctx -> {
+        router.get("/").handler(ctx -> {
             todoService.getAllTodos()
                 .onSuccess(todos -> {
                     JsonObject response = new JsonObject()
@@ -62,7 +64,7 @@ public class TodoVerticle extends AbstractVerticle {
                 });
         });
 
-        router.get("/todos/:id").handler(ctx -> {
+        router.get("/:id").handler(ctx -> {
             Long id = Long.parseLong(ctx.pathParam("id"));
             todoService.getTodoById(id)
                 .onSuccess(todo -> {
@@ -85,7 +87,7 @@ public class TodoVerticle extends AbstractVerticle {
                 });
         });
 
-        router.post("/todos").handler(ctx -> {
+        router.post("/").handler(ctx -> {
             JsonObject body = ctx.body().asJsonObject();
             Todo todo = Todo.fromJson(body);
             todoService.createTodo(todo)
@@ -103,7 +105,7 @@ public class TodoVerticle extends AbstractVerticle {
                 });
         });
 
-        router.put("/todos/:id").handler(ctx -> {
+        router.put("/:id").handler(ctx -> {
             Long id = Long.parseLong(ctx.pathParam("id"));
             JsonObject body = ctx.body().asJsonObject();
             Todo todo = Todo.fromJson(body);
@@ -122,7 +124,7 @@ public class TodoVerticle extends AbstractVerticle {
                 });
         });
 
-        router.delete("/todos/:id").handler(ctx -> {
+        router.delete("/:id").handler(ctx -> {
             Long id = Long.parseLong(ctx.pathParam("id"));
             todoService.deleteTodo(id)
                 .onSuccess(v -> {
@@ -138,17 +140,6 @@ public class TodoVerticle extends AbstractVerticle {
                 });
         });
 
-        // Start HTTP server
-        vertx.createHttpServer()
-            .requestHandler(router)
-            .listen(8888)
-            .onSuccess(http -> {
-                startPromise.complete();
-                System.out.println("Todo HTTP server started on port 8888");
-            })
-            .onFailure(err -> {
-                startPromise.fail(err);
-                System.err.println("Failed to start Todo HTTP server: " + err.getMessage());
-            });
+        startPromise.complete();
     }
 } 
