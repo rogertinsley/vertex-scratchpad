@@ -47,12 +47,68 @@ mvn compile exec:java
 
 3. When you want to see your changes, stop the application (Ctrl+C) and run the command again
 
-## Testing the Application
+## Quick Start with Docker Compose
 
-Once the application is running, you can test it by opening a web browser or using curl:
+The easiest way to run the application is using Docker Compose:
 
 ```bash
-curl http://localhost:8888/
+docker compose up
 ```
 
-You should see the response: "Hello from Vert.x!" 
+This will build and start the application and database. The application will be available at http://localhost:8888
+
+## Testing the Verticles
+
+The application has two main verticles that can be tested independently:
+
+### Todo Verticle
+
+Test the Todo API endpoints:
+
+```bash
+# Get all todos
+curl http://localhost:8888/todos/
+
+# Create a new todo
+curl -X POST http://localhost:8888/todos/ \
+  -H "Content-Type: application/json" \
+  -d '{"title": "Test Todo", "description": "This is a test todo"}'
+
+# Get a specific todo (replace {id} with actual todo id)
+curl http://localhost:8888/todos/{id}
+
+# Update a todo
+curl -X PUT http://localhost:8888/todos/{id} \
+  -H "Content-Type: application/json" \
+  -d '{"title": "Updated Todo", "description": "This is an updated todo", "completed": true}'
+
+# Delete a todo
+curl -X DELETE http://localhost:8888/todos/{id}
+```
+
+### Process Verticle
+
+Test the Process API endpoints:
+
+```bash
+# Get process verticle status
+curl http://localhost:8888/process/
+
+# Submit a task for processing
+curl -X POST http://localhost:8888/process/task \
+  -H "Content-Type: application/json" \
+  -d '{"data": "test data"}'
+
+# Create a new item
+curl -X POST http://localhost:8888/process/items \
+  -H "Content-Type: application/json" \
+  -d '{"id": "test1", "data": "test data"}'
+
+# Get a specific item
+curl http://localhost:8888/process/items/test1
+
+# Get all items
+curl http://localhost:8888/process/items
+```
+
+Note: The Process Verticle includes a worker verticle that handles long-running tasks asynchronously. When you submit a task, it will be processed in the background and return a response with the processing status. 
